@@ -1,0 +1,16 @@
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\bin\Release\MQSRequestData.exe.config
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\bin\Release\MQSRequestData.exe
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\bin\Release\MQSRequestData.pdb
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\bin\Release\FlexSuite.GlobalOperations.dll
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\bin\Release\DotNetZip.dll
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\bin\Release\FlexImageProcessing.dll
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\bin\Release\Emgu.CV.dll
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\bin\Release\Emgu.Util.dll
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Release\MQSRequestData.csprojAssemblyReference.cache
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Release\MQSRequestData.Application.resources
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Release\MQSRequestData.Properties.Resources.resources
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Release\MQSRequestData.csproj.GenerateResource.cache
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Release\MQSRequestData.csproj.CoreCompileInputs.cache
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Release\MQSRequestData.csproj.CopyComplete
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Release\MQSRequestData.exe
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Release\MQSRequestData.pdb
