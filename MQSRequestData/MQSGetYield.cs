@@ -1,6 +1,7 @@
 ﻿using GlobalOperations.Definitions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -113,6 +114,7 @@ namespace MQSRequestDataYield
                 {
                     webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
                     webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
+                    webComponent.NewWindow += new CancelEventHandler(webBrowser_NewWindow); //debug
 
                     Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
 
@@ -175,8 +177,8 @@ namespace MQSRequestDataYield
                     tabYieldElement.InvokeMember("click");
 
 
-                    //new Tab to do!
-                   
+                    // new Tab opening to do!
+
                     HtmlElement LocationElement = webComponent.Document.GetElementById("LocationList");
                     if (LocationElement == null)
                         throw new Exception("Cannot find LocationList Element");
@@ -193,7 +195,7 @@ namespace MQSRequestDataYield
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
 
-                    //errorMessage = ParseUnitHistoryData(webComponent.DocumentText, out FetchResults);
+                    errorMessage = ParseUnitHistoryData(webComponent.DocumentText, out FetchResults);
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
@@ -210,7 +212,16 @@ namespace MQSRequestDataYield
 
             return errorMessage;
 
+        }
 
+        public void webBrowser_NewWindow(object sender, CancelEventArgs e)
+        {
+            e.Cancel = true; // Cancel the new window event
+
+            WebBrowser browser = (WebBrowser)sender; // Get the current WebBrowser control
+
+            // Open the new URL in the current WebBrowser control
+            browser.Navigate(browser.StatusText);
         }
         public string StartBrowser(WebBrowser webComponent,string url, string urlTitle = null)
         {
@@ -223,6 +234,7 @@ namespace MQSRequestDataYield
                     webComponent = new WebBrowser();
                     webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
                     webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
+                    webComponent.NewWindow += new CancelEventHandler(webBrowser_NewWindow); //debug
 
                     Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", "" }, { "RawResult", "" }, { "ResultObject", new List<MqsDefinitions.TestProcess>() } };
 
