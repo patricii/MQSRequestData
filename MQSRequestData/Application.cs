@@ -21,6 +21,8 @@ namespace MQSRequestData
         }
         string url = "mqs.motorola.com";
         string home = "MQS Home";
+        string user = "jagapatr";
+        string password = "L@ura2022.5";
         string erroMsg = string.Empty;
 
         private void buttonRun_Click(object sender, EventArgs e)
@@ -28,11 +30,8 @@ namespace MQSRequestData
             List<MqsDefinitions.TestProcess> UnitInfoResults;
             MQSGetYield mGY = new MQSGetYield();
 
-           // MQSInterceptClassI dd = new MQSInterceptClassI();
-          //  dd.StartBrowserWithLogin(url, home, "jagapatr", "L@ura2022.5");
 
-
-            erroMsg = mGY.QueryYieldThread(url, out UnitInfoResults, home);
+            erroMsg = mGY.QueryYieldThreadWithLogin(user, password,url, out UnitInfoResults, home);
             if (erroMsg == string.Empty)
                 labelStatus.Text = "Page OK!";
             else

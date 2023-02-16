@@ -61,7 +61,7 @@ namespace MQSRequestDataYield
             ((Dictionary<string, object>)((WebBrowser)sender).Tag)["Navigated"] = true;
 
         }
-        public string QueryYieldThread(string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
+        public string QueryYieldThreadWithLogin(string user, string password,string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
         {
             string errorMessage = string.Empty;
             FetchResults = null;
@@ -75,7 +75,7 @@ namespace MQSRequestDataYield
 
                 List<MqsDefinitions.TestProcess> ResultsObject = null;
 
-                NavigateThread = new Thread(delegate () { errorMessage = GetYieldThreadSafe(url, out ResultsObject, urlTitle); });
+                NavigateThread = new Thread(delegate () { errorMessage = GetYieldThreadSafeWithLogin(user, password,url, out ResultsObject, urlTitle); });
                 NavigateThread.SetApartmentState(ApartmentState.STA);
                 NavigateThread.Start();
 
@@ -101,7 +101,7 @@ namespace MQSRequestDataYield
             return errorMessage;
 
         }
-        private string GetYieldThreadSafe(string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
+        private string GetYieldThreadSafeWithLogin(string user, string password, string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
         {
             string errorMessage = string.Empty;
             FetchResults = null;
@@ -132,10 +132,10 @@ namespace MQSRequestDataYield
                     strAction = "EnterLogin";
 
                     HtmlElement UserElement = webComponent.Document.GetElementById("ctl00_main_txtUserID");
-                    UserElement.SetAttribute("value", "jagapatr");
+                    UserElement.SetAttribute("value", user);
 
                     HtmlElement PassElement = webComponent.Document.GetElementById("ctl00_main_txtPassword");
-                    PassElement.SetAttribute("value", "L@ura2022.5");
+                    PassElement.SetAttribute("value", password);
 
                     HtmlElement buttonLoginElement = webComponent.Document.GetElementById("ctl00_main_btnLogin");
                     buttonLoginElement.InvokeMember("click");
@@ -161,25 +161,24 @@ namespace MQSRequestDataYield
 
                     strAction = "MqsLoad";
 
-                    HtmlElement tabYieldElement = webComponent.Document.GetElementById("ctl00_main_tabMain_tabReports_tab");
+                    HtmlElement tabMainElement = webComponent.Document.GetElementById("ctl00_main_tabMain_tabReports_tab");
 
-                    if (tabYieldElement == null)
+                    if (tabMainElement == null)
                         throw new Exception("Cannot find tabMain Element");
 
-                    tabYieldElement.InvokeMember("click");
-
-                    tabYieldElement = webComponent.Document.GetElementById("__tab_ctl00_main_tabMain_tabReports");
+                    tabMainElement.InvokeMember("click");
+           
+                    HtmlElement tabYieldElement = webComponent.Document.GetElementById("ctl00_main_tabMain_tabReports_HyperLink7");
                     if (tabYieldElement == null)
                         throw new Exception("Cannot find tabMain Hyperlink Element");
 
                     tabYieldElement.InvokeMember("click");
 
-
-                    HtmlElement SiteElement = webComponent.Document.GetElementById("LocationList");
-                    if (tabYieldElement == null)
+                    HtmlElement LocationElement = webComponent.Document.GetElementById("LocationList");
+                    if (LocationElement == null)
                         throw new Exception("Cannot find LocationList Element");
 
-                    SiteElement.SetAttribute("value", "16");            
+                    LocationElement.SetAttribute("value", "16");            
 
                     do
                     {
@@ -191,7 +190,7 @@ namespace MQSRequestDataYield
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
 
-                    errorMessage = ParseUnitHistoryData(webComponent.DocumentText, out FetchResults);
+                    //errorMessage = ParseUnitHistoryData(webComponent.DocumentText, out FetchResults);
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);

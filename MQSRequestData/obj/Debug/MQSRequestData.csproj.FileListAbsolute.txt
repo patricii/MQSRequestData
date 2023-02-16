@@ -13,3 +13,4 @@ C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Debug\MQSRequestData.c
 C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Debug\MQSRequestData.exe
 C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Debug\MQSRequestData.pdb
 C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Debug\MQSRequestData.Application.resources
+C:\DEVELOPMENT PROJECTS\MQSRequestData\MQSRequestData\obj\Debug\MQSRequestData.csprojAssemblyReference.cache
