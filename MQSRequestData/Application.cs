@@ -28,6 +28,10 @@ namespace MQSRequestData
             List<MqsDefinitions.TestProcess> UnitInfoResults;
             MQSGetYield mGY = new MQSGetYield();
 
+           // MQSInterceptClassI dd = new MQSInterceptClassI();
+          //  dd.StartBrowserWithLogin(url, home, "jagapatr", "L@ura2022.5");
+
+
             erroMsg = mGY.QueryYieldThread(url, out UnitInfoResults, home);
             if (erroMsg == string.Empty)
                 labelStatus.Text = "Page OK!";

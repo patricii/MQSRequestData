@@ -129,6 +129,36 @@ namespace MQSRequestDataYield
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
+                    strAction = "EnterLogin";
+
+                    HtmlElement UserElement = webComponent.Document.GetElementById("ctl00_main_txtUserID");
+                    UserElement.SetAttribute("value", "jagapatr");
+
+                    HtmlElement PassElement = webComponent.Document.GetElementById("ctl00_main_txtPassword");
+                    PassElement.SetAttribute("value", "L@ura2022.5");
+
+                    HtmlElement buttonLoginElement = webComponent.Document.GetElementById("ctl00_main_btnLogin");
+                    buttonLoginElement.InvokeMember("click");
+
+                    do
+                    {
+                        Application.DoEvents();
+                        Thread.Sleep(1);
+                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+
+                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
+                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+
+                    Thread.Sleep(2000);
+
+                    errorMessage = StartBrowser(webComponent, url, urlTitle);
+
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        Thread.Sleep(1000);
+                        errorMessage = StartBrowser(webComponent, url, urlTitle);
+                    }
+
                     strAction = "MqsLoad";
 
                     HtmlElement tabYieldElement = webComponent.Document.GetElementById("ctl00_main_tabMain_tabReports_tab");
@@ -178,6 +208,49 @@ namespace MQSRequestDataYield
 
             return errorMessage;
 
+
+        }
+        public string StartBrowser(WebBrowser webComponent,string url, string urlTitle = null)
+        {
+            string errorMessage = string.Empty;
+
+            try
+            {
+                if (webComponent == null)
+                {
+                    webComponent = new WebBrowser();
+                    webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
+                    webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
+
+                    Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", "" }, { "RawResult", "" }, { "ResultObject", new List<MqsDefinitions.TestProcess>() } };
+
+                    webComponent.Tag = WebInfos;
+                }
+
+                ((Dictionary<string, object>)webComponent.Tag)["URL_Title"] = urlTitle;
+
+                strAction = "MqsLoad";
+
+                webComponent.Navigate(url);
+
+                do
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(1);
+                } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+
+                if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
+                    throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+
+            }
+            catch (Exception error)
+            {
+                errorMessage = error.Message;
+                MessageBox.Show("Error: " + errorMessage);
+            }
+
+
+            return errorMessage;
 
         }
         private string cleanString(string strDirty)
