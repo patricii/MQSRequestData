@@ -34,11 +34,11 @@
             // 
             // buttonRun
             // 
-            this.buttonRun.Location = new System.Drawing.Point(150, 12);
+            this.buttonRun.Location = new System.Drawing.Point(122, 99);
             this.buttonRun.Name = "buttonRun";
-            this.buttonRun.Size = new System.Drawing.Size(52, 31);
+            this.buttonRun.Size = new System.Drawing.Size(104, 31);
             this.buttonRun.TabIndex = 0;
-            this.buttonRun.Text = "Run";
+            this.buttonRun.Text = "Get MQS Data";
             this.buttonRun.UseVisualStyleBackColor = true;
             this.buttonRun.Click += new System.EventHandler(this.buttonRun_Click);
             // 
@@ -55,7 +55,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(356, 116);
+            this.ClientSize = new System.Drawing.Size(349, 153);
             this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.buttonRun);
             this.Name = "Application";

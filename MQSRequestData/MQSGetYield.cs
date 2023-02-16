@@ -174,6 +174,9 @@ namespace MQSRequestDataYield
 
                     tabYieldElement.InvokeMember("click");
 
+
+                    //new Tab to do!
+                   
                     HtmlElement LocationElement = webComponent.Document.GetElementById("LocationList");
                     if (LocationElement == null)
                         throw new Exception("Cannot find LocationList Element");
