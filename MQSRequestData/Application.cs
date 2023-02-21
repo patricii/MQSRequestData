@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -88,7 +89,7 @@ namespace MQSRequestData
 
             ((Dictionary<string, object>)((WebBrowser)sender).Tag)["Navigated"] = true;
 
-        }      
+        }
 
         public string GetYieldThreadSafeWithLogin(string user, string password, string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
         {
@@ -117,7 +118,7 @@ namespace MQSRequestData
 
                     do
                     {
-                        Application.DoEvents();
+                        System.Windows.Forms.Application.DoEvents();
                         Thread.Sleep(1);
                     } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
 
@@ -157,9 +158,6 @@ namespace MQSRequestData
                     Thread.Sleep(2000);
 
                     setYieldParameters(webComponent);
-
-                    //Report Page
-                    
                     do
                     {
                         Application.DoEvents();
@@ -169,9 +167,10 @@ namespace MQSRequestData
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
+                    //Report Page
                     exportData(webComponent);
 
-                     errorMessage = ParseYieldyData(webComponent.DocumentText, out FetchResults);
+                    //errorMessage = ParseYieldyData(webComponent.DocumentText, out FetchResults);
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
@@ -186,14 +185,14 @@ namespace MQSRequestData
             return errorMessage;
 
         }
-      
+
         public void exportData(WebBrowser webComponent)
         {
-            HtmlElement exportElement = webComponent.Document.GetElementById("btn_export");
-            if (exportElement == null)
+            strAction = "Exporting";
+            HtmlElement buttonExportElement = webComponent.Document.GetElementById("btn_export");
+            if (buttonExportElement == null)
                 throw new Exception("Cannot find btn_export Element");
-
-            exportElement.InvokeMember("click");
+            buttonExportElement.InvokeMember("click");
         }
         public void loginMQS(WebBrowser webComponent)
         {
@@ -338,7 +337,21 @@ namespace MQSRequestData
 
             return strOutputs;
         }
-        private string ParseYieldyData(string strRawData, out List<MqsDefinitions.TestProcess> ResultsObject)
+
+        public string CaptureTAGs(string SearchText, string strTAG)
+        {
+            string strOutput = string.Empty;
+            string pattern = string.Format("<{0}.*?>(.*?)<\\/{0}>", strTAG);
+
+            MatchCollection matches = Regex.Matches(SearchText, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+            foreach (Match match in matches)
+                strOutput += match.Groups[1].Value + ",";
+
+            return strOutput.TrimEnd(',');
+        }
+
+        private string ParseUnitHistoryData(string strRawData, out List<MqsDefinitions.TestProcess> ResultsObject)
         {
             string errorMessage = string.Empty;
             ResultsObject = null;
@@ -460,6 +473,165 @@ namespace MQSRequestData
             catch (Exception error)
             {
                 ResultsObject = null;
+                errorMessage = error.Message;
+            }
+
+            return errorMessage;
+
+        }
+        private string ParseProcessHeaderData(string strRawData, string ProcessName, out List<MqsDefinitions.TestInfo> unitInfoListTemp)
+        {
+            string errorMessage = string.Empty;
+            unitInfoListTemp = new List<MqsDefinitions.TestInfo>();
+
+            try
+            {
+                //check if has data for this track_id
+                if (strRawData.Contains("<TD>TestPlatform</TD></TR></TBODY></TABLE></TD></TR>"))
+                    throw new Exception("No data for this Serial");
+
+                //get only testresults content======
+                int nStart = strRawData.IndexOf("<TD>TestPlatform</TD></TR>") + 26;
+                int nEnd = strRawData.IndexOf("</TR></TBODY></TABLE></TD></TR>", nStart) + 21;
+
+                if (nEnd < nStart)
+                    throw new Exception("Error to extract Clean Results from Page Loaded");
+
+                string WebContentClean = strRawData.Substring(nStart, nEnd - nStart);
+                //===================
+
+                List<string> TestList = new List<string>();
+
+                //break Test events===============
+                int nbreak = 0;
+                string strTestBreak = WebContentClean;
+
+                do
+                {
+                    nbreak = strTestBreak.IndexOf("</TD></TR>");
+
+                    if (nbreak != -1)
+                    {
+                        nbreak += 10;
+                        TestList.Add(strTestBreak.Substring(0, nbreak));
+                        strTestBreak = strTestBreak.Remove(0, nbreak);
+
+                    }
+
+                } while (nbreak != -1);
+                //===================
+
+                List<string> strProcessHeaderList = new List<string>();
+
+                for (int nIndex = TestList.Count - 1; nIndex >= 0; nIndex--)
+                {
+                    List<string> ProcessInfos = CaptureTAG(TestList[nIndex], "TD");
+                    //---------------             
+
+                    if (ProcessInfos.Count != 19)
+                        throw new Exception("History Header seems to be invalid!");
+
+                    if (!string.IsNullOrEmpty(ProcessInfos[7]) && ProcessInfos[7].Equals(ProcessName))
+                        strProcessHeaderList.Add(TestList[nIndex]);
+
+                }
+
+                if (strProcessHeaderList.Count < 1)
+                    throw new Exception(string.Format("Process {0} not found at Unit history", ProcessName));
+
+                foreach (string strProcessHeader in strProcessHeaderList)
+                {
+                    List<string> TestInfos = CaptureTAG(strProcessHeader, "TD");
+
+                    MqsDefinitions.TestInfo unitInfoTemp = new MqsDefinitions.TestInfo();
+
+                    if (!TestInfos[1].Contains("&nbsp")) unitInfoTemp.TimeStamp = Convert.ToDateTime(TestInfos[1]);
+                    if (!TestInfos[2].Contains("&nbsp")) unitInfoTemp.TrackID = CaptureTAGs(TestInfos[2], "A");
+                    if (!TestInfos[3].Contains("&nbsp")) unitInfoTemp.OverallPF = cleanString(TestInfos[3]);
+                    if (!TestInfos[4].Contains("&nbsp")) unitInfoTemp.Prime = cleanString(TestInfos[4]);
+                    if (!TestInfos[5].Contains("&nbsp")) unitInfoTemp.Model = cleanString(TestInfos[5]);
+                    if (!TestInfos[6].Contains("&nbsp")) unitInfoTemp.Location = cleanString(TestInfos[6]);
+                    if (!TestInfos[7].Contains("&nbsp")) unitInfoTemp.Process = cleanString(TestInfos[7]);
+                    if (!TestInfos[8].Contains("&nbsp")) unitInfoTemp.Station = cleanString(TestInfos[8]);
+                    if (!TestInfos[9].Contains("&nbsp")) unitInfoTemp.Fixture = cleanString(TestInfos[9]);
+                    if (!TestInfos[17].Contains("&nbsp")) unitInfoTemp.Testtime = Convert.ToDouble(TestInfos[17]);
+                    if (!TestInfos[10].Contains("&nbsp")) unitInfoTemp.UnitId = CaptureTAGs(TestInfos[10], "A");
+                    if (!TestInfos[11].Contains("&nbsp")) unitInfoTemp.FailureTestcode = cleanString(TestInfos[11]);
+                    if (!TestInfos[12].Contains("&nbsp")) unitInfoTemp.TestcodeDescription = cleanString(TestInfos[12]);
+                    if (!TestInfos[13].Contains("&nbsp")) unitInfoTemp.PassFail = cleanString(TestInfos[13]);
+                    if (!TestInfos[14].Contains("&nbsp")) unitInfoTemp.TestVal = Convert.ToDouble(TestInfos[14]);
+                    if (!TestInfos[15].Contains("&nbsp")) unitInfoTemp.LoLimit = Convert.ToDouble(TestInfos[15]);
+                    if (!TestInfos[16].Contains("&nbsp")) unitInfoTemp.UpLimit = Convert.ToDouble(TestInfos[16]);
+                    if (!TestInfos[18].Contains("&nbsp")) unitInfoTemp.TestPlatform = cleanString(TestInfos[18]);
+
+                    //Mount TestDetailsURL
+
+                    //get only testresults content======
+                    nStart = TestInfos[0].IndexOf("false, \"\", \"") + 12;
+                    nEnd = TestInfos[0].IndexOf("\", false, false", nStart);
+
+                    if (nEnd < nStart)
+                        throw new Exception("Error to extract Details URL Results from Page Loaded");
+
+                    unitInfoTemp.FailDesc = TestInfos[0].Substring(nStart, nEnd - nStart);
+
+                    unitInfoListTemp.Add(unitInfoTemp);
+                }
+
+            }
+            catch (Exception error)
+            {
+                unitInfoListTemp = null;
+                errorMessage = error.Message;
+            }
+
+            return errorMessage;
+        }
+
+        private string ParseProcessTestData(string strRawData, out List<MqsDefinitions.TestResult> testResultsList)
+        {
+            string errorMessage = string.Empty;
+            testResultsList = new List<MqsDefinitions.TestResult>();
+
+            try
+            {
+                //get only testresults content======
+                int nStart = strRawData.IndexOf("<TD>TestTime</TD></TR>") + 22;
+                int nEnd = strRawData.IndexOf("</TBODY></TABLE></TD>", nStart);
+
+                if (nEnd < nStart)
+                    throw new Exception("Error to extract Clean Results from Page Loaded");
+
+                string WebContentClean = strRawData.Substring(nStart, nEnd - nStart);
+                //===================
+
+                List<string> TestTagList = CaptureTAG(WebContentClean, "TR");
+
+                for (int nResultIndex = 0; nResultIndex < TestTagList.Count; nResultIndex++)
+                {
+                    List<string> Resultsinfo = CaptureTAG(TestTagList[nResultIndex], "TD");
+
+                    MqsDefinitions.TestResult resultInfoTemp = new MqsDefinitions.TestResult();
+
+                    //resultInfoTemp.LinkID = nIndexloop;
+                    resultInfoTemp.ID = nResultIndex;
+                    if (!Resultsinfo[0].Contains("&nbsp")) resultInfoTemp.TestCode = cleanString(Resultsinfo[0]);
+                    if (!Resultsinfo[1].Contains("&nbsp")) resultInfoTemp.TestCodeDesc = cleanString(Resultsinfo[1]);
+                    if (!Resultsinfo[2].Contains("&nbsp")) resultInfoTemp.PassFail = cleanString(Resultsinfo[2]);
+                    if (!Resultsinfo[3].Contains("&nbsp")) resultInfoTemp.TestVal = Convert.ToDouble(Resultsinfo[3]);
+                    if (!Resultsinfo[4].Contains("&nbsp")) resultInfoTemp.LoLimit = Convert.ToDouble(Resultsinfo[4]);
+                    if (!Resultsinfo[5].Contains("&nbsp")) resultInfoTemp.UpLimit = Convert.ToDouble(Resultsinfo[5]);
+                    if (!Resultsinfo[6].Contains("&nbsp")) resultInfoTemp.Testtime = Convert.ToDouble(Resultsinfo[6]);
+
+                    testResultsList.Add(resultInfoTemp);
+
+                }
+                //----------            
+
+            }
+            catch (Exception error)
+            {
+                testResultsList = new List<MqsDefinitions.TestResult>();
                 errorMessage = error.Message;
             }
 
