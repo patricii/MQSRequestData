@@ -1,19 +1,19 @@
 ﻿using GlobalOperations.Definitions;
+using MQSRequestData;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+
 
 namespace MQSRequestDataYield
 {
     class MQSGetYield
     {
         string strAction = string.Empty;
+
         private void webpage_Navigating(object sender, WebBrowserNavigatingEventArgs e)
         {
             ((Dictionary<string, object>)((WebBrowser)sender).Tag)["NavigationError"] = string.Empty;
@@ -102,7 +102,7 @@ namespace MQSRequestDataYield
             return errorMessage;
 
         }
-        private string GetYieldThreadSafeWithLogin(string user, string password, string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
+        public string GetYieldThreadSafeWithLogin(string user, string password, string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
         {
             string errorMessage = string.Empty;
             FetchResults = null;
@@ -114,7 +114,9 @@ namespace MQSRequestDataYield
                 {
                     webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
                     webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
-                    webComponent.NewWindow += new CancelEventHandler(webBrowser_NewWindow); //debug
+                    webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow); //debug
+
+                    //webComponent.AllowNavigation = true;
 
                     Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
 
@@ -161,6 +163,11 @@ namespace MQSRequestDataYield
                         errorMessage = StartBrowser(webComponent, url, urlTitle);
                     }
 
+                    //tabControl
+                    TabPage tab = new TabPage();
+                    tab.Text = webComponent.Url.ToString();
+
+
                     strAction = "MqsLoad";
 
                     HtmlElement tabMainElement = webComponent.Document.GetElementById("ctl00_main_tabMain_tabReports_tab");
@@ -176,8 +183,11 @@ namespace MQSRequestDataYield
 
                     tabYieldElement.InvokeMember("click");
 
-
                     // new Tab opening to do!
+
+
+                    
+
 
                     HtmlElement LocationElement = webComponent.Document.GetElementById("LocationList");
                     if (LocationElement == null)
@@ -214,7 +224,7 @@ namespace MQSRequestDataYield
 
         }
 
-        public void webBrowser_NewWindow(object sender, CancelEventArgs e)
+        public void webBrowser1_NewWindow(object sender, CancelEventArgs e)
         {
             e.Cancel = true; // Cancel the new window event
 
@@ -234,7 +244,7 @@ namespace MQSRequestDataYield
                     webComponent = new WebBrowser();
                     webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
                     webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
-                    webComponent.NewWindow += new CancelEventHandler(webBrowser_NewWindow); //debug
+                    webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow); //debug
 
                     Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", "" }, { "RawResult", "" }, { "ResultObject", new List<MqsDefinitions.TestProcess>() } };
 
