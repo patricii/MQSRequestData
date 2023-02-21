@@ -181,6 +181,24 @@ namespace MQSRequestData
                     tabYieldElement.InvokeMember("click");
 
                     // new Tab opening to do!
+                    url = "mqs.motorola.com/Collab_GridCpt/default.aspx?enc=INbDb3OXdMp3vde2LbmjfOqENqspcgXNx/9sSFuBt4l9YJObzeJfOcCHKc3GbKGAGwWF5fcyX0zSJaKBMrGv7/9C3vQtCHLGErFQnT+6UylYGmdsJPlvfKLrkaYE5qCz";
+                    webComponent.Navigate(url);
+                    urlTitle = "MQS - Yield Report";
+                    WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
+                    
+                    webComponent.Tag = WebInfos;
+                   // errorMessage = StartBrowser(webComponent, url, urlTitle);
+
+                    do
+                    {
+                        Application.DoEvents();
+                        Thread.Sleep(1);
+                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+
+                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
+                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+
+                    Thread.Sleep(2000);
 
                     HtmlElement LocationElement = webComponent.Document.GetElementById("LocationList");
                     if (LocationElement == null)
@@ -198,7 +216,7 @@ namespace MQSRequestData
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
 
-                    errorMessage = ParseUnitHistoryData(webComponent.DocumentText, out FetchResults);
+                   // errorMessage = ParseUnitHistoryData(webComponent.DocumentText, out FetchResults);
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
