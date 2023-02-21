@@ -159,7 +159,7 @@ namespace MQSRequestData
                     setYieldParameters(webComponent);
 
                     //Report Page
-                    /*
+                    
                     do
                     {
                         Application.DoEvents();
@@ -169,13 +169,9 @@ namespace MQSRequestData
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
-                    HtmlElement exportElement = webComponent.Document.GetElementById("btn_export");
-                    if (exportElement == null)
-                        throw new Exception("Cannot find btn_export Element");
+                    exportData(webComponent);
 
-                    exportElement.InvokeMember("click");*/
-
-                    errorMessage = ParseYieldyData(webComponent.DocumentText, out FetchResults);
+                     errorMessage = ParseYieldyData(webComponent.DocumentText, out FetchResults);
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
@@ -190,86 +186,14 @@ namespace MQSRequestData
             return errorMessage;
 
         }
-
-        public string GetYieldThreadSafe(string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
+      
+        public void exportData(WebBrowser webComponent)
         {
-            string errorMessage = string.Empty;
-            FetchResults = null;
+            HtmlElement exportElement = webComponent.Document.GetElementById("btn_export");
+            if (exportElement == null)
+                throw new Exception("Cannot find btn_export Element");
 
-            try
-            {
-                using (WebBrowser webComponent = new WebBrowser())
-                {
-                    TabPage tab = new TabPage();
-                    metroTabControl1.Controls.Add(tab);
-                    metroTabControl1.SelectTab(metroTabControl1.TabCount - 1);
-                    webComponent.Parent = tab;
-                    webComponent.Dock = DockStyle.Fill;
-
-                    webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
-                    webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
-                    webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow);
-
-
-                    Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
-
-                    webComponent.Tag = WebInfos;
-                    webComponent.Navigate(url);
-
-                    do
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(1);
-                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
-
-                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
-                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
-
-                    errorMessage = StartBrowser(webComponent, url, urlTitle);
-
-                    if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        Thread.Sleep(1000);
-                        errorMessage = StartBrowser(webComponent, url, urlTitle);
-                    }
-
-                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
-
-                    navigateYieldTab(webComponent);
-
-                    //New TAB "MQS - Yield Report"
-
-                    webComponent.Navigate(urlYield);
-                    WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", yield } };
-                    webComponent.Tag = WebInfos;
-                    do
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(1);
-                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
-
-                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
-                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
-
-                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
-                    Thread.Sleep(2000);
-
-                    setYieldParameters(webComponent);
-
-                    errorMessage = ParseYieldyData(webComponent.DocumentText, out FetchResults);
-
-                    if (!string.IsNullOrEmpty(errorMessage))
-                        throw new Exception(errorMessage);
-                }
-
-
-            }
-            catch (Exception error)
-            {
-                errorMessage = error.Message;
-            }
-            return errorMessage;
-
+            exportElement.InvokeMember("click");
         }
         public void loginMQS(WebBrowser webComponent)
         {
@@ -277,12 +201,18 @@ namespace MQSRequestData
             strAction = "EnterLogin";
 
             HtmlElement UserElement = webComponent.Document.GetElementById("ctl00_main_txtUserID");
+            if (UserElement == null)
+                throw new Exception("Cannot find User Name Element");
             UserElement.SetAttribute("value", user);
 
             HtmlElement PassElement = webComponent.Document.GetElementById("ctl00_main_txtPassword");
+            if (PassElement == null)
+                throw new Exception("Cannot find Password Element");
             PassElement.SetAttribute("value", password);
 
             HtmlElement buttonLoginElement = webComponent.Document.GetElementById("ctl00_main_btnLogin");
+            if (buttonLoginElement == null)
+                throw new Exception("Cannot find button login Element");
             buttonLoginElement.InvokeMember("click");
 
             Thread.Sleep(2000);
