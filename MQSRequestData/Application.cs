@@ -1,15 +1,8 @@
 ﻿using GlobalOperations.Definitions;
-using MQSRequestDataYield;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MQSRequestData
@@ -21,7 +14,9 @@ namespace MQSRequestData
             InitializeComponent();
         }
         string url = "mqs.motorola.com";
+        string urlYield = "mqs.motorola.com/Collab_GridCpt/default.aspx?enc=INbDb3OXdMp3vde2LbmjfOqENqspcgXNx/9sSFuBt4l9YJObzeJfOcCHKc3GbKGAGwWF5fcyX0zSJaKBMrGv7/9C3vQtCHLGErFQnT+6UylYGmdsJPlvfKLrkaYE5qCz";
         string home = "MQS Home";
+        string yield = "MQS - Yield Report";
         string user = "jagapatr";
         string password = "L@ura2022.7";
         string erroMsg = string.Empty;
@@ -47,21 +42,9 @@ namespace MQSRequestData
         public void webBrowser1_NewWindow(object sender, CancelEventArgs e)
         {
             e.Cancel = true; // Cancel the new window event
-
             WebBrowser browser = (WebBrowser)sender; // Get the current WebBrowser control
-
             // Open the new URL in the current WebBrowser control
             browser.Navigate(browser.StatusText);
-        }
-
-        public void webBrowser2_NewWindow(object sender, EventArgs e)
-        {
-
-            WebBrowser browser = (WebBrowser)sender; // Get the current WebBrowser control
-
-            // Open the new URL in the current WebBrowser control
-            browser.Navigate(browser.StatusText);
-
         }
         private void webpage_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
@@ -105,7 +88,7 @@ namespace MQSRequestData
             ((Dictionary<string, object>)((WebBrowser)sender).Tag)["Navigated"] = true;
 
         }
-    
+
         public string GetYieldThreadSafeWithLogin(string user, string password, string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
         {
             string errorMessage = string.Empty;
@@ -124,13 +107,12 @@ namespace MQSRequestData
 
                     webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
                     webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
-                    webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow); //debug
+                    webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow);
 
 
                     Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
 
                     webComponent.Tag = WebInfos;
-
                     webComponent.Navigate(url);
 
                     do
@@ -180,15 +162,11 @@ namespace MQSRequestData
 
                     tabYieldElement.InvokeMember("click");
 
-                    // new Tab opening to do!
-                    url = "mqs.motorola.com/Collab_GridCpt/default.aspx?enc=INbDb3OXdMp3vde2LbmjfOqENqspcgXNx/9sSFuBt4l9YJObzeJfOcCHKc3GbKGAGwWF5fcyX0zSJaKBMrGv7/9C3vQtCHLGErFQnT+6UylYGmdsJPlvfKLrkaYE5qCz";
-                    webComponent.Navigate(url);
-                    urlTitle = "MQS - Yield Report";
-                    WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
-                    
-                    webComponent.Tag = WebInfos;
-                   // errorMessage = StartBrowser(webComponent, url, urlTitle);
+                    //New TAB "MQS - Yield Report"
+                    webComponent.Navigate(urlYield);
+                    WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", yield } };
 
+                    webComponent.Tag = WebInfos;
                     do
                     {
                         Application.DoEvents();
@@ -197,6 +175,8 @@ namespace MQSRequestData
 
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+
+                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
 
                     Thread.Sleep(2000);
 
@@ -206,17 +186,22 @@ namespace MQSRequestData
 
                     LocationElement.SetAttribute("value", "16");
 
-                    do
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(1);
-                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+                    HtmlElement dateT1 = webComponent.Document.GetElementById("TextBox1");
+                    if (dateT1 == null)
+                        throw new Exception("Cannot find LocationList Element");
 
-                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
-                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+                    DateTime today = DateTime.Today;
+                    dateT1.SetAttribute("value", today.ToString("MM/dd/yyyy"));
 
 
-                   // errorMessage = ParseUnitHistoryData(webComponent.DocumentText, out FetchResults);
+                    HtmlElement dateT2 = webComponent.Document.GetElementById("TextBox2");
+                    if (dateT2 == null)
+                        throw new Exception("Cannot find LocationList Element");
+                    dateT2.SetAttribute("value", today.ToString("MM/dd/yyyy"));
+
+
+
+                    // errorMessage = ParseUnitHistoryData(webComponent.DocumentText, out FetchResults);
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
@@ -277,7 +262,7 @@ namespace MQSRequestData
             return errorMessage;
 
         }
-     
+
 
 
     }

@@ -46,7 +46,7 @@
             // labelStatus
             // 
             this.labelStatus.AutoSize = true;
-            this.labelStatus.Location = new System.Drawing.Point(346, 24);
+            this.labelStatus.Location = new System.Drawing.Point(23, 71);
             this.labelStatus.Name = "labelStatus";
             this.labelStatus.Size = new System.Drawing.Size(52, 13);
             this.labelStatus.TabIndex = 1;
@@ -60,7 +60,7 @@
             this.metroTabControl1.TabIndex = 2;
             this.metroTabControl1.UseSelectable = true;
             // 
-            // Apk
+            // ApkMQS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -68,7 +68,7 @@
             this.Controls.Add(this.metroTabControl1);
             this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.buttonRun);
-            this.Name = "Apk";
+            this.Name = "ApkMQS";
             this.Text = "MQSRequestData";
             this.ResumeLayout(false);
             this.PerformLayout();
