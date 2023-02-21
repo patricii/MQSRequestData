@@ -88,148 +88,7 @@ namespace MQSRequestData
 
             ((Dictionary<string, object>)((WebBrowser)sender).Tag)["Navigated"] = true;
 
-        }
-
-        public string GetYieldThreadSafe(string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
-        {
-            string errorMessage = string.Empty;
-            FetchResults = null;
-
-            try
-            {
-
-                using (WebBrowser webComponent = new WebBrowser())
-                {
-                    TabPage tab = new TabPage();
-                    metroTabControl1.Controls.Add(tab);
-                    metroTabControl1.SelectTab(metroTabControl1.TabCount - 1);
-                    webComponent.Parent = tab;
-                    webComponent.Dock = DockStyle.Fill;
-
-                    webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
-                    webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
-                    webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow);
-
-
-                    Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
-
-                    webComponent.Tag = WebInfos;
-                    webComponent.Navigate(url);
-
-                    do
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(1);
-                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
-
-                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
-                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
-
-                    errorMessage = StartBrowser(webComponent, url, urlTitle);
-
-                    if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        Thread.Sleep(1000);
-                        errorMessage = StartBrowser(webComponent, url, urlTitle);
-                    }
-
-                    strAction = "MqsLoad";
-
-                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
-
-                    HtmlElement tabMainElement = webComponent.Document.GetElementById("ctl00_main_tabMain_tabReports_tab");
-
-                    if (tabMainElement == null)
-                        throw new Exception("Cannot find tabMain Element");
-
-                    tabMainElement.InvokeMember("click");
-
-                    HtmlElement tabYieldElement = webComponent.Document.GetElementById("ctl00_main_tabMain_tabReports_HyperLink7");
-                    if (tabYieldElement == null)
-                        throw new Exception("Cannot find tabMain Hyperlink Element");
-
-                    tabYieldElement.InvokeMember("click");
-
-                    //New TAB "MQS - Yield Report"
-                    webComponent.Navigate(urlYield);
-                    WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", yield } };
-
-                    webComponent.Tag = WebInfos;
-                    do
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(1);
-                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
-
-                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
-                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
-
-                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
-
-                    Thread.Sleep(2000);
-
-                    HtmlElement LocationElement = webComponent.Document.GetElementById("LocationList");
-                    if (LocationElement == null)
-                        throw new Exception("Cannot find LocationList Element");
-
-                    LocationElement.SetAttribute("value", "16");
-
-                    HtmlElement dateT1 = webComponent.Document.GetElementById("TextBox1");
-                    if (dateT1 == null)
-                        throw new Exception("Cannot find LocationList Element");
-
-                    DateTime today = DateTime.Today;
-                    dateT1.SetAttribute("value", today.ToString("MM/dd/yyyy"));
-
-
-                    HtmlElement dateT2 = webComponent.Document.GetElementById("TextBox2");
-                    if (dateT2 == null)
-                        throw new Exception("Cannot find LocationList Element");
-                    dateT2.SetAttribute("value", today.ToString("MM/dd/yyyy"));
-
-
-                    HtmlElement timeT1 = webComponent.Document.GetElementById("TextBox6");
-                    if (timeT1 == null)
-                        throw new Exception("Cannot find LocationList Element");
-                    timeT1.SetAttribute("value", "00:00:00");
-
-
-                    HtmlElement timeT2 = webComponent.Document.GetElementById("TextBox7");
-                    if (timeT2 == null)
-                        throw new Exception("Cannot find LocationList Element");
-                    timeT2.SetAttribute("value", "23:59:00");
-
-
-                    HtmlElement button3Element = webComponent.Document.GetElementById("Button3");
-                    if (button3Element == null)
-                        throw new Exception("Cannot find button3 Element");
-
-                    button3Element.InvokeMember("click");
-
-                    do
-                    {
-                        Application.DoEvents();
-                        Thread.Sleep(1);
-                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
-
-                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
-                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
-
-                    errorMessage = ParseYieldyData(webComponent.DocumentText, out FetchResults);
-
-                    if (!string.IsNullOrEmpty(errorMessage))
-                        throw new Exception(errorMessage);
-                }
-
-
-            }
-            catch (Exception error)
-            {
-                errorMessage = error.Message;
-            }
-            return errorMessage;
-
-        }
+        }      
 
         public string GetYieldThreadSafeWithLogin(string user, string password, string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
         {
@@ -331,6 +190,87 @@ namespace MQSRequestData
             return errorMessage;
 
         }
+
+        public string GetYieldThreadSafe(string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
+        {
+            string errorMessage = string.Empty;
+            FetchResults = null;
+
+            try
+            {
+                using (WebBrowser webComponent = new WebBrowser())
+                {
+                    TabPage tab = new TabPage();
+                    metroTabControl1.Controls.Add(tab);
+                    metroTabControl1.SelectTab(metroTabControl1.TabCount - 1);
+                    webComponent.Parent = tab;
+                    webComponent.Dock = DockStyle.Fill;
+
+                    webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
+                    webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
+                    webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow);
+
+
+                    Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
+
+                    webComponent.Tag = WebInfos;
+                    webComponent.Navigate(url);
+
+                    do
+                    {
+                        Application.DoEvents();
+                        Thread.Sleep(1);
+                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+
+                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
+                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+
+                    errorMessage = StartBrowser(webComponent, url, urlTitle);
+
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        Thread.Sleep(1000);
+                        errorMessage = StartBrowser(webComponent, url, urlTitle);
+                    }
+
+                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+
+                    navigateYieldTab(webComponent);
+
+                    //New TAB "MQS - Yield Report"
+
+                    webComponent.Navigate(urlYield);
+                    WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", yield } };
+                    webComponent.Tag = WebInfos;
+                    do
+                    {
+                        Application.DoEvents();
+                        Thread.Sleep(1);
+                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+
+                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
+                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+
+                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                    Thread.Sleep(2000);
+
+                    setYieldParameters(webComponent);
+
+                    errorMessage = ParseYieldyData(webComponent.DocumentText, out FetchResults);
+
+                    if (!string.IsNullOrEmpty(errorMessage))
+                        throw new Exception(errorMessage);
+                }
+
+
+            }
+            catch (Exception error)
+            {
+                errorMessage = error.Message;
+            }
+            return errorMessage;
+
+        }
         public void loginMQS(WebBrowser webComponent)
         {
 
@@ -350,7 +290,6 @@ namespace MQSRequestData
         }
         public void navigateYieldTab(WebBrowser webComponent)
         {
-
             strAction = "MqsLoad";
 
             HtmlElement tabMainElement = webComponent.Document.GetElementById("ctl00_main_tabMain_tabReports_tab");
@@ -383,7 +322,6 @@ namespace MQSRequestData
             DateTime today = DateTime.Today;
             dateT1.SetAttribute("value", today.ToString("MM/dd/yyyy"));
 
-
             HtmlElement dateT2 = webComponent.Document.GetElementById("TextBox2");
             if (dateT2 == null)
                 throw new Exception("Cannot find LocationList Element");
@@ -411,7 +349,6 @@ namespace MQSRequestData
         public string StartBrowser(WebBrowser webComponent, string url, string urlTitle = null)
         {
             string errorMessage = string.Empty;
-
             try
             {
                 if (webComponent == null)
@@ -431,7 +368,6 @@ namespace MQSRequestData
                 strAction = "MqsLoad";
 
                 webComponent.Navigate(url);
-
                 do
                 {
                     Application.DoEvents();
