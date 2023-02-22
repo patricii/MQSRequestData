@@ -170,7 +170,8 @@ namespace MQSRequestData
                     //Report Page
                     exportData(webComponent);
 
-                    //errorMessage = ParseYieldyData(webComponent.DocumentText, out FetchResults);
+                    string tempFile = webComponent.DocumentText;
+                    documentTextPareser(tempFile);
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
@@ -185,14 +186,23 @@ namespace MQSRequestData
             return errorMessage;
 
         }
+        public void documentTextPareser(string documentText) {
 
+            documentText = documentText.Substring(documentText.LastIndexOf("border=\"1\" rules=\"all\" cellSpacing=\"0\">") + 39);
+            documentText = documentText.Substring(0, documentText.IndexOf("</TD></TR></TBODY></TABLE></DIV></DIV></TD></TR></TBODY></TABLE></DIV>"));
+
+            string cleanString = documentText;
+
+        }
         public void exportData(WebBrowser webComponent)
         {
             strAction = "Exporting";
             HtmlElement buttonExportElement = webComponent.Document.GetElementById("btn_export");
             if (buttonExportElement == null)
                 throw new Exception("Cannot find btn_export Element");
+
             buttonExportElement.InvokeMember("click");
+
         }
         public void loginMQS(WebBrowser webComponent)
         {
@@ -350,296 +360,5 @@ namespace MQSRequestData
 
             return strOutput.TrimEnd(',');
         }
-
-        private string ParseUnitHistoryData(string strRawData, out List<MqsDefinitions.TestProcess> ResultsObject)
-        {
-            string errorMessage = string.Empty;
-            ResultsObject = null;
-
-            try
-            {
-                //check if has data for this track_id
-                if (strRawData.Contains("** No Data Found **"))
-                    throw new Exception("No data for this Serial");
-
-                //get only testresults content======
-                int nStart = strRawData.IndexOf("<INPUT name=\"hndExpandedChild\" id=\"hndExpandedChild\" type=\"hidden\">") + 67;
-                int nEnd = strRawData.IndexOf("</DIV></TD></TR></TBODY></TABLE></DIV>", nStart) + 38;
-
-                if (nEnd < nStart)
-                    throw new Exception("Error to extract Clean Results from Page Loaded");
-
-                string WebContentClean = strRawData.Substring(nStart, nEnd - nStart);
-                //===================
-
-                List<string> TestList = new List<string>();
-
-                //break Test events===============
-                int nbreak = 0;
-                string strTestBreak = WebContentClean;
-
-                do
-                {
-                    nbreak = strTestBreak.IndexOf("</TBODY></TABLE></DIV><!-- Begin:    Bread Crumb -->");
-
-                    if (nbreak != -1)
-                    {
-                        nbreak += 52;
-                        TestList.Add(strTestBreak.Substring(0, nbreak));
-                        strTestBreak = strTestBreak.Remove(0, nbreak);
-
-                    }
-
-                } while (nbreak != -1);
-                //===================
-
-                ResultsObject = new List<MqsDefinitions.TestProcess>();
-
-
-                int nIndexloop = 0;
-
-                for (int nIndex = TestList.Count - 1; nIndex >= 0; nIndex--)
-                {
-                    //capture only headers
-                    nStart = TestList[nIndex].IndexOf("<TR align=\"right\"");
-                    nEnd = TestList[nIndex].IndexOf("</TR>", nStart) + 5;
-                    string strHeader = TestList[nIndex].Substring(nStart, nEnd - nStart);
-                    List<string> TestInfos = CaptureTAG(strHeader, "TD");
-                    //---------------             
-
-                    if (TestInfos.Count != 27)
-                        throw new Exception("History Header seems to be invalid!");
-
-                    MqsDefinitions.TestProcess unitInfoTemp = new MqsDefinitions.TestProcess();
-
-                    if (!TestInfos[1].Contains("&nbsp")) unitInfoTemp.TestHeaders.TimeStamp = Convert.ToDateTime(TestInfos[1]);
-                    if (!TestInfos[3].Contains("&nbsp")) unitInfoTemp.TestHeaders.TrackID = cleanString(TestInfos[3]);
-                    if (!TestInfos[4].Contains("&nbsp")) unitInfoTemp.TestHeaders.OverallPF = cleanString(TestInfos[4]);
-                    if (!TestInfos[5].Contains("&nbsp")) unitInfoTemp.TestHeaders.Prime = cleanString(TestInfos[5]);
-                    if (!TestInfos[6].Contains("&nbsp")) unitInfoTemp.TestHeaders.Model = cleanString(TestInfos[6]);
-                    if (!TestInfos[7].Contains("&nbsp")) unitInfoTemp.TestHeaders.Location = cleanString(TestInfos[7]);
-                    if (!TestInfos[8].Contains("&nbsp")) unitInfoTemp.TestHeaders.Process = cleanString(TestInfos[8]);
-                    if (!TestInfos[9].Contains("&nbsp")) unitInfoTemp.TestHeaders.Station = cleanString(TestInfos[9]);
-                    if (!TestInfos[10].Contains("&nbsp")) unitInfoTemp.TestHeaders.Fixture = cleanString(TestInfos[10]);
-                    if (!TestInfos[11].Contains("&nbsp")) unitInfoTemp.TestHeaders.Testtime = Convert.ToDouble(TestInfos[11]);
-                    if (!TestInfos[12].Contains("&nbsp")) unitInfoTemp.TestHeaders.UnitId = cleanString(TestInfos[12]);
-                    if (!TestInfos[13].Contains("&nbsp")) unitInfoTemp.TestHeaders.FailureTestcode = cleanString(TestInfos[13]);
-                    if (!TestInfos[14].Contains("&nbsp")) unitInfoTemp.TestHeaders.TestcodeDescription = cleanString(TestInfos[14]);
-                    if (!TestInfos[15].Contains("&nbsp")) unitInfoTemp.TestHeaders.PassFail = cleanString(TestInfos[15]);
-                    if (!TestInfos[16].Contains("&nbsp")) unitInfoTemp.TestHeaders.TestVal = Convert.ToDouble(TestInfos[16]);
-                    if (!TestInfos[17].Contains("&nbsp")) unitInfoTemp.TestHeaders.TextVal = cleanString(TestInfos[17]);
-                    if (!TestInfos[18].Contains("&nbsp")) unitInfoTemp.TestHeaders.LoLimit = Convert.ToDouble(TestInfos[18]);
-                    if (!TestInfos[19].Contains("&nbsp")) unitInfoTemp.TestHeaders.UpLimit = Convert.ToDouble(TestInfos[19]);
-                    if (!TestInfos[20].Contains("&nbsp")) unitInfoTemp.TestHeaders.FailDesc = cleanString(TestInfos[20]);
-                    if (!TestInfos[22].Contains("&nbsp")) unitInfoTemp.TestHeaders.TestPlatform = cleanString(TestInfos[22]);
-                    if (!TestInfos[23].Contains("&nbsp")) unitInfoTemp.TestHeaders.CarrierId = cleanString(TestInfos[23]);
-
-
-                    //Capture only Results
-                    string strTesResults = TestList[nIndex].Substring(nEnd);
-                    strTesResults = strTesResults.Remove(0, strTesResults.IndexOf("<TR align=\"right\""));
-
-                    unitInfoTemp.testResultsList = new List<MqsDefinitions.TestResult>();
-
-                    List<string> TestTagList = CaptureTAG(strTesResults, "TR");
-
-                    for (int nResultIndex = 0; nResultIndex < TestTagList.Count; nResultIndex++)
-                    {
-                        List<string> Resultsinfo = CaptureTAG(TestTagList[nResultIndex], "TD");
-
-                        MqsDefinitions.TestResult resultInfoTemp = new MqsDefinitions.TestResult();
-
-                        resultInfoTemp.LinkID = nIndexloop;
-                        resultInfoTemp.ID = nResultIndex;
-                        if (!Resultsinfo[0].Contains("&nbsp")) resultInfoTemp.TestCode = cleanString(Resultsinfo[0]);
-                        if (!Resultsinfo[1].Contains("&nbsp")) resultInfoTemp.TestCodeDesc = cleanString(Resultsinfo[1]);
-                        if (!Resultsinfo[2].Contains("&nbsp")) resultInfoTemp.PassFail = cleanString(Resultsinfo[2]);
-                        if (!Resultsinfo[3].Contains("&nbsp")) resultInfoTemp.TestVal = Convert.ToDouble(Resultsinfo[3]);
-                        if (!Resultsinfo[4].Contains("&nbsp")) resultInfoTemp.TextVal = cleanString(Resultsinfo[4]);
-                        if (!Resultsinfo[5].Contains("&nbsp")) resultInfoTemp.LoLimit = Convert.ToDouble(Resultsinfo[5]);
-                        if (!Resultsinfo[6].Contains("&nbsp")) resultInfoTemp.UpLimit = Convert.ToDouble(Resultsinfo[6]);
-                        if (!Resultsinfo[7].Contains("&nbsp")) resultInfoTemp.Testtime = Convert.ToDouble(Resultsinfo[7]);
-
-                        unitInfoTemp.testResultsList.Add(resultInfoTemp);
-
-                    }
-                    //----------
-
-                    ResultsObject.Add(unitInfoTemp);
-
-                    nIndexloop++;
-                }
-            }
-            catch (Exception error)
-            {
-                ResultsObject = null;
-                errorMessage = error.Message;
-            }
-
-            return errorMessage;
-
-        }
-        private string ParseProcessHeaderData(string strRawData, string ProcessName, out List<MqsDefinitions.TestInfo> unitInfoListTemp)
-        {
-            string errorMessage = string.Empty;
-            unitInfoListTemp = new List<MqsDefinitions.TestInfo>();
-
-            try
-            {
-                //check if has data for this track_id
-                if (strRawData.Contains("<TD>TestPlatform</TD></TR></TBODY></TABLE></TD></TR>"))
-                    throw new Exception("No data for this Serial");
-
-                //get only testresults content======
-                int nStart = strRawData.IndexOf("<TD>TestPlatform</TD></TR>") + 26;
-                int nEnd = strRawData.IndexOf("</TR></TBODY></TABLE></TD></TR>", nStart) + 21;
-
-                if (nEnd < nStart)
-                    throw new Exception("Error to extract Clean Results from Page Loaded");
-
-                string WebContentClean = strRawData.Substring(nStart, nEnd - nStart);
-                //===================
-
-                List<string> TestList = new List<string>();
-
-                //break Test events===============
-                int nbreak = 0;
-                string strTestBreak = WebContentClean;
-
-                do
-                {
-                    nbreak = strTestBreak.IndexOf("</TD></TR>");
-
-                    if (nbreak != -1)
-                    {
-                        nbreak += 10;
-                        TestList.Add(strTestBreak.Substring(0, nbreak));
-                        strTestBreak = strTestBreak.Remove(0, nbreak);
-
-                    }
-
-                } while (nbreak != -1);
-                //===================
-
-                List<string> strProcessHeaderList = new List<string>();
-
-                for (int nIndex = TestList.Count - 1; nIndex >= 0; nIndex--)
-                {
-                    List<string> ProcessInfos = CaptureTAG(TestList[nIndex], "TD");
-                    //---------------             
-
-                    if (ProcessInfos.Count != 19)
-                        throw new Exception("History Header seems to be invalid!");
-
-                    if (!string.IsNullOrEmpty(ProcessInfos[7]) && ProcessInfos[7].Equals(ProcessName))
-                        strProcessHeaderList.Add(TestList[nIndex]);
-
-                }
-
-                if (strProcessHeaderList.Count < 1)
-                    throw new Exception(string.Format("Process {0} not found at Unit history", ProcessName));
-
-                foreach (string strProcessHeader in strProcessHeaderList)
-                {
-                    List<string> TestInfos = CaptureTAG(strProcessHeader, "TD");
-
-                    MqsDefinitions.TestInfo unitInfoTemp = new MqsDefinitions.TestInfo();
-
-                    if (!TestInfos[1].Contains("&nbsp")) unitInfoTemp.TimeStamp = Convert.ToDateTime(TestInfos[1]);
-                    if (!TestInfos[2].Contains("&nbsp")) unitInfoTemp.TrackID = CaptureTAGs(TestInfos[2], "A");
-                    if (!TestInfos[3].Contains("&nbsp")) unitInfoTemp.OverallPF = cleanString(TestInfos[3]);
-                    if (!TestInfos[4].Contains("&nbsp")) unitInfoTemp.Prime = cleanString(TestInfos[4]);
-                    if (!TestInfos[5].Contains("&nbsp")) unitInfoTemp.Model = cleanString(TestInfos[5]);
-                    if (!TestInfos[6].Contains("&nbsp")) unitInfoTemp.Location = cleanString(TestInfos[6]);
-                    if (!TestInfos[7].Contains("&nbsp")) unitInfoTemp.Process = cleanString(TestInfos[7]);
-                    if (!TestInfos[8].Contains("&nbsp")) unitInfoTemp.Station = cleanString(TestInfos[8]);
-                    if (!TestInfos[9].Contains("&nbsp")) unitInfoTemp.Fixture = cleanString(TestInfos[9]);
-                    if (!TestInfos[17].Contains("&nbsp")) unitInfoTemp.Testtime = Convert.ToDouble(TestInfos[17]);
-                    if (!TestInfos[10].Contains("&nbsp")) unitInfoTemp.UnitId = CaptureTAGs(TestInfos[10], "A");
-                    if (!TestInfos[11].Contains("&nbsp")) unitInfoTemp.FailureTestcode = cleanString(TestInfos[11]);
-                    if (!TestInfos[12].Contains("&nbsp")) unitInfoTemp.TestcodeDescription = cleanString(TestInfos[12]);
-                    if (!TestInfos[13].Contains("&nbsp")) unitInfoTemp.PassFail = cleanString(TestInfos[13]);
-                    if (!TestInfos[14].Contains("&nbsp")) unitInfoTemp.TestVal = Convert.ToDouble(TestInfos[14]);
-                    if (!TestInfos[15].Contains("&nbsp")) unitInfoTemp.LoLimit = Convert.ToDouble(TestInfos[15]);
-                    if (!TestInfos[16].Contains("&nbsp")) unitInfoTemp.UpLimit = Convert.ToDouble(TestInfos[16]);
-                    if (!TestInfos[18].Contains("&nbsp")) unitInfoTemp.TestPlatform = cleanString(TestInfos[18]);
-
-                    //Mount TestDetailsURL
-
-                    //get only testresults content======
-                    nStart = TestInfos[0].IndexOf("false, \"\", \"") + 12;
-                    nEnd = TestInfos[0].IndexOf("\", false, false", nStart);
-
-                    if (nEnd < nStart)
-                        throw new Exception("Error to extract Details URL Results from Page Loaded");
-
-                    unitInfoTemp.FailDesc = TestInfos[0].Substring(nStart, nEnd - nStart);
-
-                    unitInfoListTemp.Add(unitInfoTemp);
-                }
-
-            }
-            catch (Exception error)
-            {
-                unitInfoListTemp = null;
-                errorMessage = error.Message;
-            }
-
-            return errorMessage;
-        }
-
-        private string ParseProcessTestData(string strRawData, out List<MqsDefinitions.TestResult> testResultsList)
-        {
-            string errorMessage = string.Empty;
-            testResultsList = new List<MqsDefinitions.TestResult>();
-
-            try
-            {
-                //get only testresults content======
-                int nStart = strRawData.IndexOf("<TD>TestTime</TD></TR>") + 22;
-                int nEnd = strRawData.IndexOf("</TBODY></TABLE></TD>", nStart);
-
-                if (nEnd < nStart)
-                    throw new Exception("Error to extract Clean Results from Page Loaded");
-
-                string WebContentClean = strRawData.Substring(nStart, nEnd - nStart);
-                //===================
-
-                List<string> TestTagList = CaptureTAG(WebContentClean, "TR");
-
-                for (int nResultIndex = 0; nResultIndex < TestTagList.Count; nResultIndex++)
-                {
-                    List<string> Resultsinfo = CaptureTAG(TestTagList[nResultIndex], "TD");
-
-                    MqsDefinitions.TestResult resultInfoTemp = new MqsDefinitions.TestResult();
-
-                    //resultInfoTemp.LinkID = nIndexloop;
-                    resultInfoTemp.ID = nResultIndex;
-                    if (!Resultsinfo[0].Contains("&nbsp")) resultInfoTemp.TestCode = cleanString(Resultsinfo[0]);
-                    if (!Resultsinfo[1].Contains("&nbsp")) resultInfoTemp.TestCodeDesc = cleanString(Resultsinfo[1]);
-                    if (!Resultsinfo[2].Contains("&nbsp")) resultInfoTemp.PassFail = cleanString(Resultsinfo[2]);
-                    if (!Resultsinfo[3].Contains("&nbsp")) resultInfoTemp.TestVal = Convert.ToDouble(Resultsinfo[3]);
-                    if (!Resultsinfo[4].Contains("&nbsp")) resultInfoTemp.LoLimit = Convert.ToDouble(Resultsinfo[4]);
-                    if (!Resultsinfo[5].Contains("&nbsp")) resultInfoTemp.UpLimit = Convert.ToDouble(Resultsinfo[5]);
-                    if (!Resultsinfo[6].Contains("&nbsp")) resultInfoTemp.Testtime = Convert.ToDouble(Resultsinfo[6]);
-
-                    testResultsList.Add(resultInfoTemp);
-
-                }
-                //----------            
-
-            }
-            catch (Exception error)
-            {
-                testResultsList = new List<MqsDefinitions.TestResult>();
-                errorMessage = error.Message;
-            }
-
-            return errorMessage;
-
-        }
-
-
-
     }
 }
