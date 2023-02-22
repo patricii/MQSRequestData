@@ -33,7 +33,8 @@ namespace MQSRequestData
 
         private void buttonRun_Click(object sender, EventArgs e)
         {
-            erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
+           // erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
+            erroMsg = GetYieldThreadSafe(url, home);
             if (erroMsg == string.Empty)
                 labelStatus.Text = "Page loaded successfully!";
             else
@@ -184,17 +185,107 @@ namespace MQSRequestData
             return errorMessage;
 
         }
+        public string GetYieldThreadSafe(string url, string urlTitle = null)
+        {
+            string errorMessage = string.Empty;
+
+            try
+            {
+                using (WebBrowser webComponent = new WebBrowser())
+                {
+                    TabPage tab = new TabPage();
+                    metroTabControl1.Controls.Add(tab);
+                    metroTabControl1.SelectTab(metroTabControl1.TabCount - 1);
+                    webComponent.Parent = tab;
+                    webComponent.Dock = DockStyle.Fill;
+
+                    webComponent.Navigating += new WebBrowserNavigatingEventHandler(webpage_Navigating);
+                    webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
+                    webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow);
+
+
+                    Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", urlTitle } };
+
+                    webComponent.Tag = WebInfos;
+                    webComponent.Navigate(url);
+
+                    do
+                    {
+                        System.Windows.Forms.Application.DoEvents();
+                        Thread.Sleep(1);
+                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+
+                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
+                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+                  
+                    errorMessage = StartBrowser(webComponent, url, urlTitle);
+
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        Thread.Sleep(1000);
+                        errorMessage = StartBrowser(webComponent, url, urlTitle);
+                    }
+
+                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+
+                    navigateYieldTab(webComponent);
+
+                    //New TAB "MQS - Yield Report"
+
+                    webComponent.Navigate(urlYield);
+                    WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", yield } };
+                    webComponent.Tag = WebInfos;
+                    do
+                    {
+                        Application.DoEvents();
+                        Thread.Sleep(1);
+                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+
+                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
+                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+
+                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                    Thread.Sleep(2000);
+
+                    setYieldParameters(webComponent);
+                    do
+                    {
+                        Application.DoEvents();
+                        Thread.Sleep(1);
+                    } while ((bool)((Dictionary<string, object>)webComponent.Tag)["Navigated"] == false);
+
+                    if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
+                        throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
+
+                    //Report Page
+                    //exportData(webComponent);
+
+                    documentTextParser(webComponent.DocumentText);
+
+                    if (!string.IsNullOrEmpty(errorMessage))
+                        throw new Exception(errorMessage);
+                }
+
+
+            }
+            catch (Exception error)
+            {
+                errorMessage = error.Message;
+            }
+            return errorMessage;
+
+        }
         public void documentTextParser(string documentText)
         {          
             documentText = documentText.Substring(documentText.LastIndexOf("border=\"1\" rules=\"all\" cellSpacing=\"0\">") + 39);
             documentText = documentText.Replace("<TBODY>", "<HTML><HEAD></HEAD><BODY><FORM><TABLE><TBODY>");
             string cleanPage = documentText;
-            string directoryName = @"C:\prod\temp\DailyYield.html";
+            string directoryName = textBoxSave.Text + "DailyYield.html";
             using (StreamWriter sw = File.CreateText(directoryName))
             {
                 sw.Write(cleanPage);
             }
-            directoryName = @"C:\prod\temp\DailyYield.xls";
+            directoryName = textBoxSave.Text + "DailyYield.xls";
             using (StreamWriter sw = File.CreateText(directoryName))
             {
                 sw.Write(cleanPage);
