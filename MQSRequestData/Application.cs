@@ -193,7 +193,6 @@ namespace MQSRequestData
                         throw new Exception(errorMessage);
                 }
 
-
             }
             catch (Exception error)
             {
@@ -440,42 +439,7 @@ namespace MQSRequestData
 
             return errorMessage;
 
-        }
-
-        private string cleanString(string strDirty)
-        {
-            Regex trimmer = new Regex(@"\s\s+");
-            string strTemp = strDirty.Replace("\r", "").Replace("\n", "");
-
-            return trimmer.Replace(strTemp, " ");
-        }
-
-        public List<string> CaptureTAG(string SearchText, string strTAG)
-        {
-            List<string> strOutputs = new List<string>();
-            string pattern = string.Format("<{0}.*?>(.*?)<\\/{0}>", strTAG);
-
-            MatchCollection matches = Regex.Matches(SearchText, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-            foreach (Match match in matches)
-                strOutputs.Add(match.Groups[1].Value);
-
-            return strOutputs;
-        }
-
-        public string CaptureTAGs(string SearchText, string strTAG)
-        {
-            string strOutput = string.Empty;
-            string pattern = string.Format("<{0}.*?>(.*?)<\\/{0}>", strTAG);
-
-            MatchCollection matches = Regex.Matches(SearchText, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-            foreach (Match match in matches)
-                strOutput += match.Groups[1].Value + ",";
-
-            return strOutput.TrimEnd(',');
-        }
-
+        } 
         private void button1_Click(object sender, EventArgs e)
         {
             if (checkBoxLogin.Checked)
