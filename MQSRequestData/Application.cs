@@ -33,13 +33,13 @@ namespace MQSRequestData
 
         private void buttonRun_Click(object sender, EventArgs e)
         {
-
-            List<MqsDefinitions.TestProcess> UnitInfoResults;
-            erroMsg = GetYieldThreadSafeWithLogin(user, password, url, out UnitInfoResults, home);
+            erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
             if (erroMsg == string.Empty)
-                labelStatus.Text = "Page OK!";
+                labelStatus.Text = "Page loaded successfully!";
             else
                 labelStatus.Text = "Page Error: " + erroMsg;
+
+            Environment.Exit(0);
         }
         public void webBrowser1_NewWindow(object sender, CancelEventArgs e)
         {
@@ -91,10 +91,9 @@ namespace MQSRequestData
 
         }
 
-        public string GetYieldThreadSafeWithLogin(string user, string password, string url, out List<MqsDefinitions.TestProcess> FetchResults, string urlTitle = null)
+        public string GetYieldThreadSafeWithLogin(string user, string password, string url,string urlTitle = null)
         {
             string errorMessage = string.Empty;
-            FetchResults = null;
 
             try
             {
@@ -168,10 +167,9 @@ namespace MQSRequestData
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
                     //Report Page
-                    exportData(webComponent);
+                    //exportData(webComponent);
 
-                    string tempFile = webComponent.DocumentText;
-                    documentTextPareser(tempFile);
+                    documentTextParser(webComponent.DocumentText);
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
@@ -186,12 +184,23 @@ namespace MQSRequestData
             return errorMessage;
 
         }
-        public void documentTextPareser(string documentText) {
-
+        public void documentTextParser(string documentText)
+        {          
             documentText = documentText.Substring(documentText.LastIndexOf("border=\"1\" rules=\"all\" cellSpacing=\"0\">") + 39);
-            documentText = documentText.Substring(0, documentText.IndexOf("</TD></TR></TBODY></TABLE></DIV></DIV></TD></TR></TBODY></TABLE></DIV>"));
+            documentText = documentText.Replace("<TBODY>", "<HTML><HEAD></HEAD><BODY><FORM><TABLE><TBODY>");
+            string cleanPage = documentText;
+            string directoryName = @"C:\prod\temp\DailyYield.html";
+            using (StreamWriter sw = File.CreateText(directoryName))
+            {
+                sw.Write(cleanPage);
+            }
+            directoryName = @"C:\prod\temp\DailyYield.xls";
+            using (StreamWriter sw = File.CreateText(directoryName))
+            {
+                sw.Write(cleanPage);
+            }
 
-            string cleanString = documentText;
+
 
         }
         public void exportData(WebBrowser webComponent)
