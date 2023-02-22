@@ -33,8 +33,11 @@ namespace MQSRequestData
 
         private void buttonRun_Click(object sender, EventArgs e)
         {
-            erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
-           // erroMsg = GetYieldThreadSafe(url, home);
+            if (checkBoxLogin.Checked)
+                erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
+            else
+            erroMsg = GetYieldThreadSafe(url, home);
+
             if (erroMsg == string.Empty)
             {
                 labelStatus.Text = "Page loaded successfully!";
@@ -165,7 +168,7 @@ namespace MQSRequestData
                     metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
                     labelStatus.Text = "Extrating Data...";
                     Thread.Sleep(2000);
-                    
+
                     setYieldParameters(webComponent);
                     do
                     {
