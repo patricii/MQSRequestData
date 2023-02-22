@@ -46,7 +46,7 @@ namespace MQSRequestData
                 MessageBox.Show("Page Error: " + erroMsg);
             }
 
-            //Environment.Exit(0);
+            this.Close();
         }
         public void webBrowser1_NewWindow(object sender, CancelEventArgs e)
         {

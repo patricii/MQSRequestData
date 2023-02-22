@@ -59,7 +59,6 @@
             // 
             // metroTabControl1
             // 
-            this.metroTabControl1.Enabled = false;
             this.metroTabControl1.Location = new System.Drawing.Point(24, 119);
             this.metroTabControl1.Name = "metroTabControl1";
             this.metroTabControl1.Size = new System.Drawing.Size(360, 42);
