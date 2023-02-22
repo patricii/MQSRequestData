@@ -14,13 +14,14 @@ namespace MQSRequestData
         public ApkMQS()
         {
             InitializeComponent();
+
         }
         string url = "mqs.motorola.com";
         string urlYield = "mqs.motorola.com/Collab_GridCpt/default.aspx?enc=INbDb3OXdMp3vde2LbmjfOqENqspcgXNx/9sSFuBt4l9YJObzeJfOcCHKc3GbKGAGwWF5fcyX0zSJaKBMrGv7/9C3vQtCHLGErFQnT+6UylYGmdsJPlvfKLrkaYE5qCz";
         string home = "MQS Home";
         string yield = "MQS - Yield Report";
-        string user = "jagapatr"; //debug
-        string password = "L@ura2022.7"; //debug
+        string user = string.Empty;
+        string password = string.Empty;
         string erroMsg = string.Empty;
         string strAction = string.Empty;
 
@@ -34,9 +35,13 @@ namespace MQSRequestData
         private void buttonRun_Click(object sender, EventArgs e)
         {
             if (checkBoxLogin.Checked)
+            {
+                user = textBoxUser.Text;
+                password = textBoxPassword.Text;
                 erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
+            }
             else
-            erroMsg = GetYieldThreadSafe(url, home);
+                erroMsg = GetYieldThreadSafe(url, home);
 
             if (erroMsg == string.Empty)
             {
@@ -304,9 +309,6 @@ namespace MQSRequestData
             {
                 sw.Write(cleanPage);
             }
-
-
-
         }
         public void exportData(WebBrowser webComponent)
         {
@@ -316,7 +318,6 @@ namespace MQSRequestData
                 throw new Exception("Cannot find btn_export Element");
 
             buttonExportElement.InvokeMember("click");
-
         }
         public void loginMQS(WebBrowser webComponent)
         {
@@ -473,6 +474,15 @@ namespace MQSRequestData
                 strOutput += match.Groups[1].Value + ",";
 
             return strOutput.TrimEnd(',');
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (checkBoxLogin.Checked)
+            {
+                textBoxUser.Enabled = true;
+                textBoxPassword.Enabled = true;
+            }
         }
     }
 }
