@@ -36,9 +36,15 @@ namespace MQSRequestData
            // erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
             erroMsg = GetYieldThreadSafe(url, home);
             if (erroMsg == string.Empty)
+            {
                 labelStatus.Text = "Page loaded successfully!";
+                MessageBox.Show("Yield Request From MQS success!");
+            }
             else
+            {
                 labelStatus.Text = "Page Error: " + erroMsg;
+                MessageBox.Show("Page Error: " + erroMsg);
+            }
 
             Environment.Exit(0);
         }
@@ -92,7 +98,7 @@ namespace MQSRequestData
 
         }
 
-        public string GetYieldThreadSafeWithLogin(string user, string password, string url,string urlTitle = null)
+        public string GetYieldThreadSafeWithLogin(string user, string password, string url, string urlTitle = null)
         {
             string errorMessage = string.Empty;
 
@@ -217,7 +223,7 @@ namespace MQSRequestData
 
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
-                  
+
                     errorMessage = StartBrowser(webComponent, url, urlTitle);
 
                     if (!string.IsNullOrEmpty(errorMessage))
@@ -276,7 +282,7 @@ namespace MQSRequestData
 
         }
         public void documentTextParser(string documentText)
-        {          
+        {
             documentText = documentText.Substring(documentText.LastIndexOf("border=\"1\" rules=\"all\" cellSpacing=\"0\">") + 39);
             documentText = documentText.Replace("<TBODY>", "<HTML><HEAD></HEAD><BODY><FORM><TABLE><TBODY>");
             string cleanPage = documentText;
