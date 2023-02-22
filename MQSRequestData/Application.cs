@@ -33,8 +33,8 @@ namespace MQSRequestData
 
         private void buttonRun_Click(object sender, EventArgs e)
         {
-           // erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
-            erroMsg = GetYieldThreadSafe(url, home);
+            erroMsg = GetYieldThreadSafeWithLogin(user, password, url, home);
+           // erroMsg = GetYieldThreadSafe(url, home);
             if (erroMsg == string.Empty)
             {
                 labelStatus.Text = "Page loaded successfully!";
@@ -46,7 +46,7 @@ namespace MQSRequestData
                 MessageBox.Show("Page Error: " + erroMsg);
             }
 
-            Environment.Exit(0);
+            //Environment.Exit(0);
         }
         public void webBrowser1_NewWindow(object sender, CancelEventArgs e)
         {
@@ -101,6 +101,7 @@ namespace MQSRequestData
         public string GetYieldThreadSafeWithLogin(string user, string password, string url, string urlTitle = null)
         {
             string errorMessage = string.Empty;
+            labelStatus.Text = "Connecting to MQS System..";
 
             try
             {
@@ -131,6 +132,7 @@ namespace MQSRequestData
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
+                    labelStatus.Text = "Connected!!!";
 
                     loginMQS(webComponent);
 
@@ -161,8 +163,9 @@ namespace MQSRequestData
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
                     metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                    labelStatus.Text = "Extrating Data...";
                     Thread.Sleep(2000);
-
+                    
                     setYieldParameters(webComponent);
                     do
                     {
@@ -193,6 +196,7 @@ namespace MQSRequestData
         }
         public string GetYieldThreadSafe(string url, string urlTitle = null)
         {
+            labelStatus.Text = "Connecting to MQS System..";
             string errorMessage = string.Empty;
 
             try
@@ -223,7 +227,7 @@ namespace MQSRequestData
 
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
-
+                    labelStatus.Text = "Connected!!!";
                     errorMessage = StartBrowser(webComponent, url, urlTitle);
 
                     if (!string.IsNullOrEmpty(errorMessage))
@@ -251,6 +255,7 @@ namespace MQSRequestData
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
                     metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                    labelStatus.Text = "Extrating Data...";
                     Thread.Sleep(2000);
 
                     setYieldParameters(webComponent);
