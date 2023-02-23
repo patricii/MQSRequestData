@@ -150,7 +150,7 @@ namespace MQSRequestData
                         errorMessage = StartBrowser(webComponent, url, urlTitle);
                     }
 
-                   // metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                    // metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
 
                     navigateYieldTab(webComponent);
 
@@ -364,31 +364,37 @@ namespace MQSRequestData
             if (LocationElement == null)
                 throw new Exception("Cannot find LocationList Element");
 
-            LocationElement.SetAttribute("value", "16");
+            if (comboBoxSites.Text == "MDB_Manaus")
+                LocationElement.SetAttribute("value", "95");
+
+            else
+                LocationElement.SetAttribute("value", "16"); //MDB_Jaguariuna Default
 
             HtmlElement dateT1 = webComponent.Document.GetElementById("TextBox1");
             if (dateT1 == null)
                 throw new Exception("Cannot find LocationList Element");
 
-            DateTime today = DateTime.Today;
-            dateT1.SetAttribute("value", today.ToString("MM/dd/yyyy"));
+            //DateTime today = DateTime.Today;
+            dateT1.SetAttribute("value", dateTimePickerStart.Text);
 
             HtmlElement dateT2 = webComponent.Document.GetElementById("TextBox2");
             if (dateT2 == null)
                 throw new Exception("Cannot find LocationList Element");
-            dateT2.SetAttribute("value", today.ToString("MM/dd/yyyy"));
+            dateT2.SetAttribute("value", dateTimePickerEnd.Text);
 
 
             HtmlElement timeT1 = webComponent.Document.GetElementById("TextBox6");
             if (timeT1 == null)
                 throw new Exception("Cannot find LocationList Element");
-            timeT1.SetAttribute("value", "00:00:00");
+            string hourStart = textBoxStartHour.Text;
+            timeT1.SetAttribute("value", hourStart);
 
 
             HtmlElement timeT2 = webComponent.Document.GetElementById("TextBox7");
             if (timeT2 == null)
                 throw new Exception("Cannot find LocationList Element");
-            timeT2.SetAttribute("value", "23:59:00");
+            string hourEnd = textBoxEndHour.Text;
+            timeT2.SetAttribute("value", hourEnd);
 
 
             HtmlElement button3Element = webComponent.Document.GetElementById("Button3");
@@ -409,7 +415,7 @@ namespace MQSRequestData
                     webComponent.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webpage_DocumentCompleted);
                     webComponent.NewWindow += new CancelEventHandler(webBrowser1_NewWindow);
 
-                    Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", "" }, { "RawResult", "" }, { "ResultObject", "" } };
+                    Dictionary<string, object> WebInfos = new Dictionary<string, object>() { { "NavigationError", "" }, { "Navigated", false }, { "URL_Title", "" } };
 
                     webComponent.Tag = WebInfos;
                 }
@@ -437,7 +443,7 @@ namespace MQSRequestData
 
             return errorMessage;
 
-        } 
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             if (checkBoxLogin.Checked)
