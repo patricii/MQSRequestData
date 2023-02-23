@@ -44,7 +44,7 @@ namespace MQSRequestData
             if (erroMsg == string.Empty)
             {
                 labelStatus.Text = "Page loaded successfully!";
-                MessageBox.Show("Yield Request From MQS success!");
+                MessageBox.Show("MQS Data Request downloaded successfully!");
             }
             else
             {
@@ -150,7 +150,7 @@ namespace MQSRequestData
                         errorMessage = StartBrowser(webComponent, url, urlTitle);
                     }
 
-                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                   // metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
 
                     navigateYieldTab(webComponent);
 
@@ -168,7 +168,7 @@ namespace MQSRequestData
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
-                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                    //metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
                     labelStatus.Text = "Extrating Data...";
                     Thread.Sleep(2000);
 
@@ -241,7 +241,7 @@ namespace MQSRequestData
                         errorMessage = StartBrowser(webComponent, url, urlTitle);
                     }
 
-                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                    //metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
 
                     navigateYieldTab(webComponent);
 
@@ -259,7 +259,7 @@ namespace MQSRequestData
                     if (!string.IsNullOrEmpty(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString()))
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
-                    metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
+                    //metroTabControl1.SelectedTab.Text = webComponent.DocumentTitle;
                     labelStatus.Text = "Extrating Data...";
                     Thread.Sleep(2000);
 
@@ -296,12 +296,12 @@ namespace MQSRequestData
             documentText = documentText.Substring(documentText.LastIndexOf("border=\"1\" rules=\"all\" cellSpacing=\"0\">") + 39);
             documentText = documentText.Replace("<TBODY>", "<HTML><HEAD></HEAD><BODY><FORM><TABLE><TBODY>");
             string cleanPage = documentText;
-            string directoryName = textBoxSave.Text + "DailyYield.html";
+            string directoryName = textBoxSave.Text + "DailyMQSData.html";
             using (StreamWriter sw = File.CreateText(directoryName))
             {
                 sw.Write(cleanPage);
             }
-            directoryName = textBoxSave.Text + "DailyYield.xls";
+            directoryName = textBoxSave.Text + "DailyMQSData.xls";
             using (StreamWriter sw = File.CreateText(directoryName))
             {
                 sw.Write(cleanPage);
