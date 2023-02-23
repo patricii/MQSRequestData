@@ -189,13 +189,16 @@ namespace MQSRequestData
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
-                }
+
+                    webComponent.Dispose();
+                }                
 
             }
             catch (Exception error)
             {
                 errorMessage = error.Message;
             }
+
             return errorMessage;
 
         }
@@ -280,6 +283,8 @@ namespace MQSRequestData
 
                     if (!string.IsNullOrEmpty(errorMessage))
                         throw new Exception(errorMessage);
+
+                    webComponent.Dispose();
                 }
 
 
