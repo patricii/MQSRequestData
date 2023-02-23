@@ -61,9 +61,9 @@
             // buttonRun
             // 
             this.buttonRun.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonRun.Location = new System.Drawing.Point(325, 267);
+            this.buttonRun.Location = new System.Drawing.Point(331, 276);
             this.buttonRun.Name = "buttonRun";
-            this.buttonRun.Size = new System.Drawing.Size(139, 52);
+            this.buttonRun.Size = new System.Drawing.Size(144, 81);
             this.buttonRun.TabIndex = 0;
             this.buttonRun.Text = "Get MQS Data";
             this.buttonRun.UseVisualStyleBackColor = true;
@@ -106,7 +106,7 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = global::MQSRequestData.Properties.Resources.FLEX_logo;
-            this.pictureBox1.Location = new System.Drawing.Point(389, 14);
+            this.pictureBox1.Location = new System.Drawing.Point(378, 11);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(117, 59);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -289,7 +289,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(28, 13);
             this.label5.TabIndex = 16;
-            this.label5.Text = "v1.1";
+            this.label5.Text = "v1.2";
             // 
             // ApkMQS
             // 

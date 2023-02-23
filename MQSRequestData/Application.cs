@@ -291,22 +291,26 @@ namespace MQSRequestData
             return errorMessage;
 
         }
+      
         public void documentTextParser(string documentText)
         {
             documentText = documentText.Substring(documentText.LastIndexOf("border=\"1\" rules=\"all\" cellSpacing=\"0\">") + 39);
             documentText = documentText.Replace("<TBODY>", "<HTML><HEAD></HEAD><BODY><FORM><TABLE><TBODY>");
             string cleanPage = documentText;
-            string directoryName = textBoxSave.Text + "DailyMQSData.html";
+            DateTime today = DateTime.Now;
+            string directoryName = textBoxSave.Text + "DailyMQSData_" + today.ToString("yyyyMMdd_hhmmss") + ".html";
             using (StreamWriter sw = File.CreateText(directoryName))
             {
                 sw.Write(cleanPage);
             }
-            directoryName = textBoxSave.Text + "DailyMQSData.xls";
+            directoryName = textBoxSave.Text + "DailyMQSData_" + today.ToString("yyyyMMdd_hhmmss") + ".xls";
             using (StreamWriter sw = File.CreateText(directoryName))
             {
                 sw.Write(cleanPage);
             }
+
         }
+     
         public void exportData(WebBrowser webComponent)
         {
             strAction = "Exporting";
