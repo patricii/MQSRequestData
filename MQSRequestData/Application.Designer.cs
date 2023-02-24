@@ -52,6 +52,8 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.comboBoxSites = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.buttonFolder = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -89,7 +91,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(144, 60);
+            this.label1.Location = new System.Drawing.Point(88, 60);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(78, 13);
             this.label1.TabIndex = 3;
@@ -97,11 +99,11 @@
             // 
             // textBoxSave
             // 
-            this.textBoxSave.Location = new System.Drawing.Point(228, 53);
+            this.textBoxSave.Location = new System.Drawing.Point(172, 53);
             this.textBoxSave.Name = "textBoxSave";
             this.textBoxSave.Size = new System.Drawing.Size(144, 20);
             this.textBoxSave.TabIndex = 4;
-            this.textBoxSave.Text = "C:\\temp\\";
+            this.textBoxSave.Text = "C:\\temp";
             // 
             // pictureBox1
             // 
@@ -291,11 +293,22 @@
             this.label5.TabIndex = 16;
             this.label5.Text = "v1.2";
             // 
+            // buttonFolder
+            // 
+            this.buttonFolder.Location = new System.Drawing.Point(322, 53);
+            this.buttonFolder.Name = "buttonFolder";
+            this.buttonFolder.Size = new System.Drawing.Size(34, 21);
+            this.buttonFolder.TabIndex = 17;
+            this.buttonFolder.Text = "...";
+            this.buttonFolder.UseVisualStyleBackColor = true;
+            this.buttonFolder.Click += new System.EventHandler(this.buttonFolder_Click);
+            // 
             // ApkMQS
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(527, 389);
+            this.Controls.Add(this.buttonFolder);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -346,6 +359,8 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.ComboBox comboBoxSites;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+        private System.Windows.Forms.Button buttonFolder;
     }
 }
 

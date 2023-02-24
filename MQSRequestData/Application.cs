@@ -303,27 +303,17 @@ namespace MQSRequestData
             documentText = documentText.Replace("<TBODY>", "<HTML><HEAD></HEAD><BODY><FORM><TABLE><TBODY>");
             string cleanPage = documentText;
             DateTime today = DateTime.Now;
-            string directoryName = textBoxSave.Text + "DailyMQSData_" + today.ToString("yyyyMMdd_hhmmss") + ".html";
+            string directoryName = textBoxSave.Text + "\\DailyMQSData_" + today.ToString("yyyyMMdd_hhmmss") + ".html";
             using (StreamWriter sw = File.CreateText(directoryName))
             {
                 sw.Write(cleanPage);
             }
-            directoryName = textBoxSave.Text + "DailyMQSData_" + today.ToString("yyyyMMdd_hhmmss") + ".xls";
+            directoryName = textBoxSave.Text + "\\DailyMQSData_" + today.ToString("yyyyMMdd_hhmmss") + ".xls";
             using (StreamWriter sw = File.CreateText(directoryName))
             {
                 sw.Write(cleanPage);
             }
 
-        }
-     
-        public void exportData(WebBrowser webComponent)
-        {
-            strAction = "Exporting";
-            HtmlElement buttonExportElement = webComponent.Document.GetElementById("btn_export");
-            if (buttonExportElement == null)
-                throw new Exception("Cannot find btn_export Element");
-
-            buttonExportElement.InvokeMember("click");
         }
         public void loginMQS(WebBrowser webComponent)
         {
@@ -459,6 +449,14 @@ namespace MQSRequestData
             {
                 textBoxUser.Enabled = true;
                 textBoxPassword.Enabled = true;
+            }
+        }
+
+        private void buttonFolder_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                textBoxSave.Text = folderBrowserDialog1.SelectedPath;
             }
         }
     }
