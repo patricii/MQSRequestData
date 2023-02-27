@@ -277,8 +277,6 @@ namespace MQSRequestData
                         throw new Exception(((Dictionary<string, object>)webComponent.Tag)["NavigationError"].ToString());
 
                     //Report Page
-                    //exportData(webComponent);
-
                     documentTextParser(webComponent.DocumentText);
 
                     if (!string.IsNullOrEmpty(errorMessage))
